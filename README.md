@@ -74,4 +74,10 @@ Never connect a random third-party instance to your Business account unless you 
 
 ## License
 
+RulefyBot is licensed under the
+GNU Affero General Public License v3.0.
 
+You are free to use, modify, and distribute
+this software under the terms of the license.
+
+See [LICENSE](./LICENSE) for details.
