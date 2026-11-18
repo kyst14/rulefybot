@@ -4,15 +4,20 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "typecheck": "bun check"
+    "typecheck": "bun check",
+    "contract:emit": "prisma contract emit"
   },
   "devDependencies": {
+    "@prisma/cli-engine": "0.10.0",
     "@types/node": "^26.6.6",
+    "prettier": "^3.10.1",
+    "prettier-plugin-prisma": "^5.0.0",
     "prisma": "^8.0.0-rc.34",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@prisma/orm-postgres": "^8.0.0-rc.24",
     "dotenv": "^18.0.10"
   }
 }

@@ -1,0 +1,54 @@
+// use prisma-8
+
+model User {
+  tgid   BigInt  @id
+  connId String? @unique
+
+  chats    Chat[]
+  messages Message[]
+
+  createdAt DateTime @default(now())
+}
+
+model Chat {
+  id     Int    @id @default(autoincrement())
+  tgId   BigInt
+  userId BigInt
+
+  lastAccessedAt DateTime @default(now())
+
+  messages Message[]
+  user     User      @relation("UserChats", fields: [userId], references: [tgid], onDelete: Cascade)
+
+  @@unique([id, tgId])
+  @@unique([tgId, userId], name: "tgId_userId")
+}
+
+model Message {
+  id      Int         @id @default(autoincrement())
+  tgId    BigInt
+  type    MessageType
+  content String
+
+  lastAccessedAt DateTime @default(now())
+
+  userId   BigInt
+  chatId   Int
+  tgChatId BigInt
+
+  user User @relation(fields: [userId], references: [tgid], onDelete: Cascade)
+  chat Chat @relation(fields: [chatId, tgChatId], references: [id, tgId], onDelete: Cascade)
+}
+
+enum MessageType {
+  TEXT
+  PHOTO
+  VIDEO
+  DOCUMENT
+  AUDIO
+  VOICE
+  ANIMATION
+  STICKER
+  VIDEO_NOTE
+  UNDEFINED
+}
