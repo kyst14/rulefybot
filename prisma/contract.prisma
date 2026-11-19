@@ -7,7 +7,7 @@ model User {
   chats    Chat[]
   messages Message[]
 
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 }
 
 model Chat {
@@ -19,9 +19,11 @@ model Chat {
 
   messages Message[]
   user     User      @relation("UserChats", fields: [userId], references: [tgid], onDelete: Cascade)
+  User     User?     @relation(fields: [userTgid], references: [tgid])
+  userTgid BigInt?
 
   @@unique([id, tgId])
-  @@unique([tgId, userId], name: "tgId_userId")
+  @@unique([tgId, userId])
 }
 
 model Message {

@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "typecheck": "bun check",
+    "dev:bot": "bun run --filter @rulefybot/bot dev",
+    "dev:api": "bun run --filter @rulefybot/api dev",
+    "dev:app": "bun run --filter @rulefybot/mini-app dev",
     "contract:emit": "prisma contract emit"
   },
   "devDependencies": {
@@ -19,5 +21,9 @@
   "dependencies": {
     "@prisma/orm-postgres": "^8.0.0-rc.24",
     "dotenv": "^18.0.10"
-  }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

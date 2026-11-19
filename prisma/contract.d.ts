@@ -23,9 +23,8 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'920a87b50729a867e21706dd0fa5c3739e273a84ed89eb2f3525633b2d6ef85c'>;
-export type ExecutionHash =
-  ExecutionHashBase<'0ff7f5c55037616d53a67c7c581c1178658b41c7a674a85dd59fc3b8f9dd8a49'>;
+  StorageHashBase<'5651e81deb7fea854107afcc8a2209f7868ca57d8dfa490d58c810e468959977'>;
+export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -578,7 +577,38 @@ type DefaultLiteralValue<
   : Encoded;
 type ParameterizedOutputTypeFunctions = PgParameterizedOutputTypes;
 
-type FieldTypeOverrides = {};
+type FieldTypeOverrides = {
+  readonly public: {
+    readonly models: {
+      readonly Message: {
+        readonly type: {
+          readonly output:
+            | 'TEXT'
+            | 'PHOTO'
+            | 'VIDEO'
+            | 'DOCUMENT'
+            | 'AUDIO'
+            | 'VOICE'
+            | 'ANIMATION'
+            | 'STICKER'
+            | 'VIDEO_NOTE'
+            | 'UNDEFINED';
+          readonly input:
+            | 'TEXT'
+            | 'PHOTO'
+            | 'VIDEO'
+            | 'DOCUMENT'
+            | 'AUDIO'
+            | 'VOICE'
+            | 'ANIMATION'
+            | 'STICKER'
+            | 'VIDEO_NOTE'
+            | 'UNDEFINED';
+        };
+      };
+    };
+  };
+};
 export type FieldOutputTypes = FieldTypesFromDomain<
   ContractBase['domain']['namespaces'],
   CodecTypes,
@@ -595,7 +625,36 @@ export type FieldInputTypes = FieldTypesFromDomain<
   'input',
   ContractBase['storage']['namespaces']
 >;
-type ColumnTypeOverrides = {};
+type ColumnTypeOverrides = {
+  readonly public: {
+    readonly Message: {
+      readonly type: {
+        readonly output:
+          | 'TEXT'
+          | 'PHOTO'
+          | 'VIDEO'
+          | 'DOCUMENT'
+          | 'AUDIO'
+          | 'VOICE'
+          | 'ANIMATION'
+          | 'STICKER'
+          | 'VIDEO_NOTE'
+          | 'UNDEFINED';
+        readonly input:
+          | 'TEXT'
+          | 'PHOTO'
+          | 'VIDEO'
+          | 'DOCUMENT'
+          | 'AUDIO'
+          | 'VOICE'
+          | 'ANIMATION'
+          | 'STICKER'
+          | 'VIDEO_NOTE'
+          | 'UNDEFINED';
+      };
+    };
+  };
+};
 export type StorageColumnTypes = ColumnTypesFromStorage<
   ContractBase['storage'],
   CodecTypes,
@@ -612,31 +671,42 @@ export type StorageColumnInputTypes = ColumnTypesFromStorage<
 >;
 
 export namespace Models {
-  export type public_Post = {
-    authorId: FieldOutputTypes['public']['Post']['authorId'];
-    content: FieldOutputTypes['public']['Post']['content'];
-    createdAt: FieldOutputTypes['public']['Post']['createdAt'];
-    id: FieldOutputTypes['public']['Post']['id'];
-    title: FieldOutputTypes['public']['Post']['title'];
-    updatedAt: FieldOutputTypes['public']['Post']['updatedAt'];
-    author: public_User;
-    readonly [RelationKeys]?: 'author';
+  export type public_Chat = {
+    id: FieldOutputTypes['public']['Chat']['id'];
+    lastAccessedAt: FieldOutputTypes['public']['Chat']['lastAccessedAt'];
+    tgId: FieldOutputTypes['public']['Chat']['tgId'];
+    userId: FieldOutputTypes['public']['Chat']['userId'];
+    messages: public_Message[];
+    user: public_User;
+    readonly [RelationKeys]?: 'messages' | 'user';
+  };
+  export type public_Message = {
+    chatId: FieldOutputTypes['public']['Message']['chatId'];
+    content: FieldOutputTypes['public']['Message']['content'];
+    id: FieldOutputTypes['public']['Message']['id'];
+    lastAccessedAt: FieldOutputTypes['public']['Message']['lastAccessedAt'];
+    tgChatId: FieldOutputTypes['public']['Message']['tgChatId'];
+    tgId: FieldOutputTypes['public']['Message']['tgId'];
+    type: FieldOutputTypes['public']['Message']['type'];
+    userId: FieldOutputTypes['public']['Message']['userId'];
+    chat: public_Chat;
+    user: public_User;
+    readonly [RelationKeys]?: 'chat' | 'user';
   };
   export type public_User = {
+    connId: FieldOutputTypes['public']['User']['connId'];
     createdAt: FieldOutputTypes['public']['User']['createdAt'];
-    email: FieldOutputTypes['public']['User']['email'];
-    id: FieldOutputTypes['public']['User']['id'];
-    name: FieldOutputTypes['public']['User']['name'];
-    updatedAt: FieldOutputTypes['public']['User']['updatedAt'];
-    username: FieldOutputTypes['public']['User']['username'];
-    posts: public_Post[];
-    readonly [RelationKeys]?: 'posts';
+    tgid: FieldOutputTypes['public']['User']['tgid'];
+    chats: public_Chat[];
+    messages: public_Message[];
+    readonly [RelationKeys]?: 'chats' | 'messages';
   };
 }
 
 export declare const models: {
   public: {
-    Post: Models.public_Post;
+    Chat: Models.public_Chat;
+    Message: Models.public_Message;
     User: Models.public_User;
   };
 };
@@ -659,9 +729,73 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly Post: {
+            readonly Chat: {
               columns: {
-                readonly authorId: {
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly lastAccessedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'now()';
+                  };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly tgId: {
+                  readonly dataType: 'pg/int8';
+                  readonly codecId: 'pg/int8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly userId: {
+                  readonly dataType: 'pg/int8';
+                  readonly codecId: 'pg/int8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [
+                { readonly columns: readonly ['id', 'tgId'] },
+                { readonly columns: readonly ['tgId', 'userId'] },
+              ];
+              indexes: readonly [
+                {
+                  readonly name: 'Chat_userId_idx_a489d58a';
+                  readonly prefix: 'Chat_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Chat';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['tgid'];
+                  };
+                },
+              ];
+            };
+            readonly Message: {
+              columns: {
+                readonly chatId: {
                   readonly dataType: 'pg/int4';
                   readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
@@ -670,18 +804,7 @@ type ContractBase = Omit<
                 readonly content: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                  readonly many: false;
-                };
-                readonly createdAt: {
-                  readonly dataType: 'pg/timestamptz';
-                  readonly codecId: 'pg/timestamptz-date@1';
                   readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'function';
-                    readonly expression: 'now()';
-                  };
-                  readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
                 readonly id: {
@@ -694,17 +817,39 @@ type ContractBase = Omit<
                   };
                   readonly many: false;
                 };
-                readonly title: {
+                readonly lastAccessedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'now()';
+                  };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly tgChatId: {
+                  readonly dataType: 'pg/int8';
+                  readonly codecId: 'pg/int8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly tgId: {
+                  readonly dataType: 'pg/int8';
+                  readonly codecId: 'pg/int8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly type: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
-                readonly updatedAt: {
-                  readonly dataType: 'pg/timestamptz';
-                  readonly codecId: 'pg/timestamptz-date@1';
+                readonly userId: {
+                  readonly dataType: 'pg/int8';
+                  readonly codecId: 'pg/int8@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
               };
@@ -712,9 +857,15 @@ type ContractBase = Omit<
               uniques: readonly [];
               indexes: readonly [
                 {
-                  readonly name: 'Post_authorId_idx_e47547ed';
-                  readonly prefix: 'Post_authorId_idx';
-                  readonly columns: readonly ['authorId'];
+                  readonly name: 'Message_chatId_tgChatId_idx_0974307c';
+                  readonly prefix: 'Message_chatId_tgChatId_idx';
+                  readonly columns: readonly ['chatId', 'tgChatId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Message_userId_idx_a489d58a';
+                  readonly prefix: 'Message_userId_idx';
+                  readonly columns: readonly ['userId'];
                   readonly unique: false;
                 },
               ];
@@ -722,19 +873,37 @@ type ContractBase = Omit<
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'Post';
-                    readonly columns: readonly ['authorId'];
+                    readonly tableName: 'Message';
+                    readonly columns: readonly ['userId'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
                     readonly tableName: 'User';
-                    readonly columns: readonly ['id'];
+                    readonly columns: readonly ['tgid'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Message';
+                    readonly columns: readonly ['chatId', 'tgChatId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Chat';
+                    readonly columns: readonly ['id', 'tgId'];
                   };
                 },
               ];
             };
             readonly User: {
               columns: {
+                readonly connId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
                 readonly createdAt: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-date@1';
@@ -746,46 +915,34 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
-                readonly email: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
+                readonly tgid: {
+                  readonly dataType: 'pg/int8';
+                  readonly codecId: 'pg/int8@1';
                   readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly id: {
-                  readonly dataType: 'pg/int4';
-                  readonly codecId: 'pg/int4@1';
-                  readonly nullable: false;
-                  readonly default: {
-                    readonly kind: 'function';
-                    readonly expression: 'autoincrement()';
-                  };
-                  readonly many: false;
-                };
-                readonly name: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
-                  readonly many: false;
-                };
-                readonly updatedAt: {
-                  readonly dataType: 'pg/timestamptz';
-                  readonly codecId: 'pg/timestamptz-date@1';
-                  readonly nullable: false;
-                  readonly typeParams: { readonly precision: 3 };
-                  readonly many: false;
-                };
-                readonly username: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
                   readonly many: false;
                 };
               };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [{ readonly columns: readonly ['email'] }];
+              primaryKey: { readonly columns: readonly ['tgid'] };
+              uniques: readonly [{ readonly columns: readonly ['connId'] }];
               indexes: readonly [];
               foreignKeys: readonly [];
+            };
+          };
+          readonly valueSet: {
+            readonly MessageType: {
+              readonly kind: 'valueSet';
+              readonly values: readonly [
+                'TEXT',
+                'PHOTO',
+                'VIDEO',
+                'DOCUMENT',
+                'AUDIO',
+                'VOICE',
+                'ANIMATION',
+                'STICKER',
+                'VIDEO_NOTE',
+                'UNDEFINED',
+              ];
             };
           };
         };
@@ -798,9 +955,13 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly Post: {
+    readonly Chat: {
       readonly namespace: 'public' & NamespaceId;
-      readonly model: 'Post';
+      readonly model: 'Chat';
+    };
+    readonly Message: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'Message';
     };
     readonly User: {
       readonly namespace: 'public' & NamespaceId;
@@ -811,30 +972,8 @@ type ContractBase = Omit<
     readonly namespaces: {
       readonly public: {
         readonly models: {
-          readonly Post: {
+          readonly Chat: {
             readonly fields: {
-              readonly authorId: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/int4@1';
-                };
-              };
-              readonly content: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly createdAt: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-date@1';
-                  readonly typeParams: { readonly precision: 3 };
-                };
-              };
               readonly id: {
                 readonly nullable: false;
                 readonly type: {
@@ -842,14 +981,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                 };
               };
-              readonly title: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly updatedAt: {
+              readonly lastAccessedAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
@@ -857,9 +989,34 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly tgId: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int8@1';
+                };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int8@1';
+                };
+              };
             };
             readonly relations: {
-              readonly author: {
+              readonly messages: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Message';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id', 'tgId'];
+                  readonly targetFields: readonly ['chatId', 'tgChatId'];
+                };
+              };
+              readonly user: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
                   readonly model: 'User';
@@ -867,35 +1024,32 @@ type ContractBase = Omit<
                 readonly cardinality: 'N:1';
                 readonly nullable: false;
                 readonly on: {
-                  readonly localFields: readonly ['authorId'];
-                  readonly targetFields: readonly ['id'];
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['tgid'];
                 };
               };
             };
             readonly storage: {
-              readonly table: 'Post';
+              readonly table: 'Chat';
               readonly namespaceId: 'public';
               readonly fields: {
-                readonly authorId: { readonly column: 'authorId' };
-                readonly content: { readonly column: 'content' };
-                readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
-                readonly title: { readonly column: 'title' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly lastAccessedAt: { readonly column: 'lastAccessedAt' };
+                readonly tgId: { readonly column: 'tgId' };
+                readonly userId: { readonly column: 'userId' };
               };
             };
           };
-          readonly User: {
+          readonly Message: {
             readonly fields: {
-              readonly createdAt: {
+              readonly chatId: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
-                  readonly codecId: 'pg/timestamptz-date@1';
-                  readonly typeParams: { readonly precision: 3 };
+                  readonly codecId: 'pg/int4@1';
                 };
               };
-              readonly email: {
+              readonly content: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
@@ -909,14 +1063,7 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/int4@1';
                 };
               };
-              readonly name: {
-                readonly nullable: true;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'pg/text@1';
-                };
-              };
-              readonly updatedAt: {
+              readonly lastAccessedAt: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
@@ -924,24 +1071,122 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
-              readonly username: {
+              readonly tgChatId: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int8@1';
+                };
+              };
+              readonly tgId: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int8@1';
+                };
+              };
+              readonly type: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/text@1';
+                };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int8@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly chat: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Chat';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['chatId', 'tgChatId'];
+                  readonly targetFields: readonly ['id', 'tgId'];
+                };
+              };
+              readonly user: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'User';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['tgid'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Message';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly chatId: { readonly column: 'chatId' };
+                readonly content: { readonly column: 'content' };
+                readonly id: { readonly column: 'id' };
+                readonly lastAccessedAt: { readonly column: 'lastAccessedAt' };
+                readonly tgChatId: { readonly column: 'tgChatId' };
+                readonly tgId: { readonly column: 'tgId' };
+                readonly type: { readonly column: 'type' };
+                readonly userId: { readonly column: 'userId' };
+              };
+            };
+          };
+          readonly User: {
+            readonly fields: {
+              readonly connId: {
                 readonly nullable: true;
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/text@1';
                 };
               };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly tgid: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/int8@1';
+                };
+              };
             };
             readonly relations: {
-              readonly posts: {
+              readonly chats: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Post';
+                  readonly model: 'Chat';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
-                  readonly localFields: readonly ['id'];
-                  readonly targetFields: readonly ['authorId'];
+                  readonly localFields: readonly ['tgid'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+              readonly messages: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Message';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['tgid'];
+                  readonly targetFields: readonly ['userId'];
                 };
               };
             };
@@ -949,15 +1194,43 @@ type ContractBase = Omit<
               readonly table: 'User';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly connId: { readonly column: 'connId' };
                 readonly createdAt: { readonly column: 'createdAt' };
-                readonly email: { readonly column: 'email' };
-                readonly id: { readonly column: 'id' };
-                readonly name: { readonly column: 'name' };
-                readonly updatedAt: { readonly column: 'updatedAt' };
-                readonly username: { readonly column: 'username' };
+                readonly tgid: { readonly column: 'tgid' };
               };
             };
           };
+        };
+        readonly enum: {
+          readonly MessageType: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'TEXT'; readonly value: 'TEXT' },
+              { readonly name: 'PHOTO'; readonly value: 'PHOTO' },
+              { readonly name: 'VIDEO'; readonly value: 'VIDEO' },
+              { readonly name: 'DOCUMENT'; readonly value: 'DOCUMENT' },
+              { readonly name: 'AUDIO'; readonly value: 'AUDIO' },
+              { readonly name: 'VOICE'; readonly value: 'VOICE' },
+              { readonly name: 'ANIMATION'; readonly value: 'ANIMATION' },
+              { readonly name: 'STICKER'; readonly value: 'STICKER' },
+              { readonly name: 'VIDEO_NOTE'; readonly value: 'VIDEO_NOTE' },
+              { readonly name: 'UNDEFINED'; readonly value: 'UNDEFINED' },
+            ];
+          };
+        };
+        readonly enumMemberTypes?: {
+          readonly MessageType: readonly [
+            { readonly name: 'TEXT'; readonly value: 'TEXT' },
+            { readonly name: 'PHOTO'; readonly value: 'PHOTO' },
+            { readonly name: 'VIDEO'; readonly value: 'VIDEO' },
+            { readonly name: 'DOCUMENT'; readonly value: 'DOCUMENT' },
+            { readonly name: 'AUDIO'; readonly value: 'AUDIO' },
+            { readonly name: 'VOICE'; readonly value: 'VOICE' },
+            { readonly name: 'ANIMATION'; readonly value: 'ANIMATION' },
+            { readonly name: 'STICKER'; readonly value: 'STICKER' },
+            { readonly name: 'VIDEO_NOTE'; readonly value: 'VIDEO_NOTE' },
+            { readonly name: 'UNDEFINED'; readonly value: 'UNDEFINED' },
+          ];
         };
       };
     };
@@ -991,71 +1264,6 @@ type ContractBase = Omit<
     };
   };
   readonly extensions: {};
-  readonly execution: {
-    readonly executionHash: ExecutionHash;
-    readonly mutations: {
-      readonly defaults: readonly [
-        {
-          readonly onCreate: {
-            readonly id: 'timestampNow';
-            readonly kind: 'generator';
-            readonly params: { readonly precision: 3 };
-          };
-          readonly ref: {
-            readonly entry: 'Post';
-            readonly field: 'createdAt';
-            readonly namespace: 'public';
-          };
-        },
-        {
-          readonly onCreate: {
-            readonly id: 'timestampNow';
-            readonly kind: 'generator';
-            readonly params: { readonly precision: 3 };
-          };
-          readonly onUpdate: {
-            readonly id: 'timestampNow';
-            readonly kind: 'generator';
-            readonly params: { readonly precision: 3 };
-          };
-          readonly ref: {
-            readonly entry: 'Post';
-            readonly field: 'updatedAt';
-            readonly namespace: 'public';
-          };
-        },
-        {
-          readonly onCreate: {
-            readonly id: 'timestampNow';
-            readonly kind: 'generator';
-            readonly params: { readonly precision: 3 };
-          };
-          readonly ref: {
-            readonly entry: 'User';
-            readonly field: 'createdAt';
-            readonly namespace: 'public';
-          };
-        },
-        {
-          readonly onCreate: {
-            readonly id: 'timestampNow';
-            readonly kind: 'generator';
-            readonly params: { readonly precision: 3 };
-          };
-          readonly onUpdate: {
-            readonly id: 'timestampNow';
-            readonly kind: 'generator';
-            readonly params: { readonly precision: 3 };
-          };
-          readonly ref: {
-            readonly entry: 'User';
-            readonly field: 'updatedAt';
-            readonly namespace: 'public';
-          };
-        },
-      ];
-    };
-  };
   readonly meta: {};
   readonly profileHash: ProfileHash;
 };

@@ -4,8 +4,12 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "Post": {
-      "model": "Post",
+    "Chat": {
+      "model": "Chat",
+      "namespace": "public"
+    },
+    "Message": {
+      "model": "Message",
       "namespace": "public"
     },
     "User": {
@@ -16,33 +20,56 @@
   "domain": {
     "namespaces": {
       "public": {
+        "enum": {
+          "MessageType": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "TEXT",
+                "value": "TEXT"
+              },
+              {
+                "name": "PHOTO",
+                "value": "PHOTO"
+              },
+              {
+                "name": "VIDEO",
+                "value": "VIDEO"
+              },
+              {
+                "name": "DOCUMENT",
+                "value": "DOCUMENT"
+              },
+              {
+                "name": "AUDIO",
+                "value": "AUDIO"
+              },
+              {
+                "name": "VOICE",
+                "value": "VOICE"
+              },
+              {
+                "name": "ANIMATION",
+                "value": "ANIMATION"
+              },
+              {
+                "name": "STICKER",
+                "value": "STICKER"
+              },
+              {
+                "name": "VIDEO_NOTE",
+                "value": "VIDEO_NOTE"
+              },
+              {
+                "name": "UNDEFINED",
+                "value": "UNDEFINED"
+              }
+            ]
+          }
+        },
         "models": {
-          "Post": {
+          "Chat": {
             "fields": {
-              "authorId": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/int4@1",
-                  "kind": "scalar"
-                }
-              },
-              "content": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "createdAt": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/timestamptz-date@1",
-                  "kind": "scalar",
-                  "typeParams": {
-                    "precision": 3
-                  }
-                }
-              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -50,14 +77,7 @@
                   "kind": "scalar"
                 }
               },
-              "title": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "updatedAt": {
+              "lastAccessedAt": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-date@1",
@@ -66,15 +86,40 @@
                     "precision": 3
                   }
                 }
+              },
+              "tgId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
-              "author": {
+              "messages": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": ["id", "tgId"],
+                  "targetFields": ["chatId", "tgChatId"]
+                },
+                "to": {
+                  "model": "Message",
+                  "namespace": "public"
+                }
+              },
+              "user": {
                 "cardinality": "N:1",
                 "nullable": false,
                 "on": {
-                  "localFields": ["authorId"],
-                  "targetFields": ["id"]
+                  "localFields": ["userId"],
+                  "targetFields": ["tgid"]
                 },
                 "to": {
                   "model": "User",
@@ -84,42 +129,33 @@
             },
             "storage": {
               "fields": {
-                "authorId": {
-                  "column": "authorId"
-                },
-                "content": {
-                  "column": "content"
-                },
-                "createdAt": {
-                  "column": "createdAt"
-                },
                 "id": {
                   "column": "id"
                 },
-                "title": {
-                  "column": "title"
+                "lastAccessedAt": {
+                  "column": "lastAccessedAt"
                 },
-                "updatedAt": {
-                  "column": "updatedAt"
+                "tgId": {
+                  "column": "tgId"
+                },
+                "userId": {
+                  "column": "userId"
                 }
               },
               "namespaceId": "public",
-              "table": "Post"
+              "table": "Chat"
             }
           },
-          "User": {
+          "Message": {
             "fields": {
-              "createdAt": {
+              "chatId": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/timestamptz-date@1",
-                  "kind": "scalar",
-                  "typeParams": {
-                    "precision": 3
-                  }
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
                 }
               },
-              "email": {
+              "content": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -133,14 +169,7 @@
                   "kind": "scalar"
                 }
               },
-              "name": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "updatedAt": {
+              "lastAccessedAt": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-date@1",
@@ -150,46 +179,159 @@
                   }
                 }
               },
-              "username": {
-                "nullable": true,
+              "tgChatId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "tgId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              },
+              "type": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "MessageType",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
                   "kind": "scalar"
                 }
               }
             },
             "relations": {
-              "posts": {
-                "cardinality": "1:N",
+              "chat": {
+                "cardinality": "N:1",
+                "nullable": false,
                 "on": {
-                  "localFields": ["id"],
-                  "targetFields": ["authorId"]
+                  "localFields": ["chatId", "tgChatId"],
+                  "targetFields": ["id", "tgId"]
                 },
                 "to": {
-                  "model": "Post",
+                  "model": "Chat",
+                  "namespace": "public"
+                }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": ["userId"],
+                  "targetFields": ["tgid"]
+                },
+                "to": {
+                  "model": "User",
                   "namespace": "public"
                 }
               }
             },
             "storage": {
               "fields": {
-                "createdAt": {
-                  "column": "createdAt"
+                "chatId": {
+                  "column": "chatId"
                 },
-                "email": {
-                  "column": "email"
+                "content": {
+                  "column": "content"
                 },
                 "id": {
                   "column": "id"
                 },
-                "name": {
-                  "column": "name"
+                "lastAccessedAt": {
+                  "column": "lastAccessedAt"
                 },
-                "updatedAt": {
-                  "column": "updatedAt"
+                "tgChatId": {
+                  "column": "tgChatId"
                 },
-                "username": {
-                  "column": "username"
+                "tgId": {
+                  "column": "tgId"
+                },
+                "type": {
+                  "column": "type"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "Message"
+            }
+          },
+          "User": {
+            "fields": {
+              "connId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-date@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "tgid": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int8@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "chats": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": ["tgid"],
+                  "targetFields": ["userId"]
+                },
+                "to": {
+                  "model": "Chat",
+                  "namespace": "public"
+                }
+              },
+              "messages": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": ["tgid"],
+                  "targetFields": ["userId"]
+                },
+                "to": {
+                  "model": "Message",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "connId": {
+                  "column": "connId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "tgid": {
+                  "column": "tgid"
                 }
               },
               "namespaceId": "public",
@@ -205,19 +347,18 @@
       "public": {
         "entries": {
           "table": {
-            "Post": {
+            "Chat": {
               "columns": {
-                "authorId": {
+                "id": {
                   "codecId": "pg/int4@1",
                   "dataType": "pg/int4",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
                   "nullable": false
                 },
-                "content": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": true
-                },
-                "createdAt": {
+                "lastAccessedAt": {
                   "codecId": "pg/timestamptz-date@1",
                   "dataType": "pg/timestamptz",
                   "default": {
@@ -229,6 +370,74 @@
                     "precision": 3
                   }
                 },
+                "tgId": {
+                  "codecId": "pg/int8@1",
+                  "dataType": "pg/int8",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int8@1",
+                  "dataType": "pg/int8",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "Chat_userId_idx_a489d58a"
+                  },
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": ["userId"],
+                    "namespaceId": "public",
+                    "tableName": "Chat"
+                  },
+                  "target": {
+                    "columns": ["tgid"],
+                    "namespaceId": "public",
+                    "tableName": "User"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": ["userId"],
+                  "name": "Chat_userId_idx_a489d58a",
+                  "prefix": "Chat_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": ["id"]
+              },
+              "uniques": [
+                {
+                  "columns": ["id", "tgId"]
+                },
+                {
+                  "columns": ["tgId", "userId"]
+                }
+              ]
+            },
+            "Message": {
+              "checks": [
+                {
+                  "expression": "\"type\" IN ('TEXT', 'PHOTO', 'VIDEO', 'DOCUMENT', 'AUDIO', 'VOICE', 'ANIMATION', 'STICKER', 'VIDEO_NOTE', 'UNDEFINED')",
+                  "name": "Message_type_check_60f9ea0b",
+                  "prefix": "Message_type_check"
+                }
+              ],
+              "columns": {
+                "chatId": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": false
+                },
+                "content": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "dataType": "pg/int4",
@@ -238,42 +447,90 @@
                   },
                   "nullable": false
                 },
-                "title": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                },
-                "updatedAt": {
+                "lastAccessedAt": {
                   "codecId": "pg/timestamptz-date@1",
                   "dataType": "pg/timestamptz",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
                   "nullable": false,
                   "typeParams": {
                     "precision": 3
                   }
+                },
+                "tgChatId": {
+                  "codecId": "pg/int8@1",
+                  "dataType": "pg/int8",
+                  "nullable": false
+                },
+                "tgId": {
+                  "codecId": "pg/int8@1",
+                  "dataType": "pg/int8",
+                  "nullable": false
+                },
+                "type": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "MessageType",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "userId": {
+                  "codecId": "pg/int8@1",
+                  "dataType": "pg/int8",
+                  "nullable": false
                 }
               },
               "foreignKeys": [
                 {
                   "index": {
-                    "name": "Post_authorId_idx_e47547ed"
+                    "name": "Message_userId_idx_a489d58a"
                   },
+                  "onDelete": "cascade",
                   "source": {
-                    "columns": ["authorId"],
+                    "columns": ["userId"],
                     "namespaceId": "public",
-                    "tableName": "Post"
+                    "tableName": "Message"
                   },
                   "target": {
-                    "columns": ["id"],
+                    "columns": ["tgid"],
                     "namespaceId": "public",
                     "tableName": "User"
+                  }
+                },
+                {
+                  "index": {
+                    "name": "Message_chatId_tgChatId_idx_0974307c"
+                  },
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": ["chatId", "tgChatId"],
+                    "namespaceId": "public",
+                    "tableName": "Message"
+                  },
+                  "target": {
+                    "columns": ["id", "tgId"],
+                    "namespaceId": "public",
+                    "tableName": "Chat"
                   }
                 }
               ],
               "indexes": [
                 {
-                  "columns": ["authorId"],
-                  "name": "Post_authorId_idx_e47547ed",
-                  "prefix": "Post_authorId_idx",
+                  "columns": ["chatId", "tgChatId"],
+                  "name": "Message_chatId_tgChatId_idx_0974307c",
+                  "prefix": "Message_chatId_tgChatId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": ["userId"],
+                  "name": "Message_userId_idx_a489d58a",
+                  "prefix": "Message_userId_idx",
                   "unique": false
                 }
               ],
@@ -284,6 +541,11 @@
             },
             "User": {
               "columns": {
+                "connId": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": true
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-date@1",
                   "dataType": "pg/timestamptz",
@@ -296,48 +558,38 @@
                     "precision": 3
                   }
                 },
-                "email": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
+                "tgid": {
+                  "codecId": "pg/int8@1",
+                  "dataType": "pg/int8",
                   "nullable": false
-                },
-                "id": {
-                  "codecId": "pg/int4@1",
-                  "dataType": "pg/int4",
-                  "default": {
-                    "expression": "autoincrement()",
-                    "kind": "function"
-                  },
-                  "nullable": false
-                },
-                "name": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": true
-                },
-                "updatedAt": {
-                  "codecId": "pg/timestamptz-date@1",
-                  "dataType": "pg/timestamptz",
-                  "nullable": false,
-                  "typeParams": {
-                    "precision": 3
-                  }
-                },
-                "username": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": true
                 }
               },
               "foreignKeys": [],
               "indexes": [],
               "primaryKey": {
-                "columns": ["id"]
+                "columns": ["tgid"]
               },
               "uniques": [
                 {
-                  "columns": ["email"]
+                  "columns": ["connId"]
                 }
+              ]
+            }
+          },
+          "valueSet": {
+            "MessageType": {
+              "kind": "valueSet",
+              "values": [
+                "TEXT",
+                "PHOTO",
+                "VIDEO",
+                "DOCUMENT",
+                "AUDIO",
+                "VOICE",
+                "ANIMATION",
+                "STICKER",
+                "VIDEO_NOTE",
+                "UNDEFINED"
               ]
             }
           }
@@ -346,84 +598,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "920a87b50729a867e21706dd0fa5c3739e273a84ed89eb2f3525633b2d6ef85c"
-  },
-  "execution": {
-    "executionHash": "0ff7f5c55037616d53a67c7c581c1178658b41c7a674a85dd59fc3b8f9dd8a49",
-    "mutations": {
-      "defaults": [
-        {
-          "onCreate": {
-            "id": "timestampNow",
-            "kind": "generator",
-            "params": {
-              "precision": 3
-            }
-          },
-          "ref": {
-            "entry": "Post",
-            "field": "createdAt",
-            "namespace": "public"
-          }
-        },
-        {
-          "onCreate": {
-            "id": "timestampNow",
-            "kind": "generator",
-            "params": {
-              "precision": 3
-            }
-          },
-          "onUpdate": {
-            "id": "timestampNow",
-            "kind": "generator",
-            "params": {
-              "precision": 3
-            }
-          },
-          "ref": {
-            "entry": "Post",
-            "field": "updatedAt",
-            "namespace": "public"
-          }
-        },
-        {
-          "onCreate": {
-            "id": "timestampNow",
-            "kind": "generator",
-            "params": {
-              "precision": 3
-            }
-          },
-          "ref": {
-            "entry": "User",
-            "field": "createdAt",
-            "namespace": "public"
-          }
-        },
-        {
-          "onCreate": {
-            "id": "timestampNow",
-            "kind": "generator",
-            "params": {
-              "precision": 3
-            }
-          },
-          "onUpdate": {
-            "id": "timestampNow",
-            "kind": "generator",
-            "params": {
-              "precision": 3
-            }
-          },
-          "ref": {
-            "entry": "User",
-            "field": "updatedAt",
-            "namespace": "public"
-          }
-        }
-      ]
-    }
+    "storageHash": "5651e81deb7fea854107afcc8a2209f7868ca57d8dfa490d58c810e468959977"
   },
   "capabilities": {
     "postgres": {
